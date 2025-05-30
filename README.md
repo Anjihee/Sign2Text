@@ -10,8 +10,9 @@
 │   
 └── README.md
 ```
----
+<br>
 
+---
 # 📊 사용한 데이터셋
 
 **AI HUB 한글 수어 데이터셋**
@@ -26,6 +27,8 @@
 * **Morpheme JSON 파일**
   `SignLangData\01_real_word_morpheme\004.수어영상\1.Training\라벨링데이터\REAL\WORD\morpheme\01`
   → 약 **15,000개**
+
+<br>
 
 ---
 
