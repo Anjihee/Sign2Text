@@ -5,3 +5,4 @@ __pycache__/
 *.pkl
 dataset/*.zip
 .ipynb_checkpoints/
+dataset/merged_labeled_vectors.csv
