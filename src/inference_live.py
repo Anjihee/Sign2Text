@@ -5,7 +5,7 @@ import joblib
 import time
 from tensorflow.keras.models import load_model
 from PIL import ImageFont, ImageDraw, Image
-from collections import deque, Counter
+from collections import deque
 
 # 📁 한글 폰트 경로 (macOS 기준)
 font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
@@ -57,13 +57,13 @@ def extract_dual_hand_landmarks(results, image_width, image_height):
 cap = cv2.VideoCapture(0)
 print("🟢 실시간 수어 인식 시작 (Q 키로 종료)")
 
-# ✅ 스무딩을 위한 버퍼
-prediction_buffer = deque(maxlen=5)  # 최근 5개 프레임의 예측 라벨 저장
+# ✅ 스무딩용 softmax 버퍼
+prediction_buffer = deque(maxlen=5)
 last_label = ""
 cooldown = 0
-threshold = 0.5
+CONFIDENCE_THRESHOLD = 0.6
 last_debug_time = 0
-debug_interval = 5.0
+debug_interval = 3.0  # 3초마다 디버깅 출력
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -85,32 +85,36 @@ while cap.isOpened():
             if np.all(coords == 0):
                 continue
 
-            prediction = model.predict(coords, verbose=0)
-            confidence = np.max(prediction)
-            predicted_label = label_encoder.inverse_transform([np.argmax(prediction)])[0]
+            prediction = model.predict(coords, verbose=0)[0]
+            prediction_buffer.append(prediction)
 
-            # 버퍼에 예측값 추가
-            prediction_buffer.append(predicted_label)
-
-            # 디버깅 출력
             current_time = time.time()
             if current_time - last_debug_time > debug_interval:
-                top3 = prediction[0].argsort()[-3:][::-1]
-                print("🎯 상위 예측 결과:")
+                print("📌 좌표 일부 (왼손 x[:3]):", coords.flatten()[:3])
+                print("📌 좌표 일부 (왼손 y[:3]):", coords.flatten()[21:24])
+                print("📌 좌표 일부 (오른손 x[:3]):", coords.flatten()[42:45])
+                print("📌 좌표 일부 (오른손 y[:3]):", coords.flatten()[63:66])
+                print("----------------------------------------")
+                avg_probs = np.mean(prediction_buffer, axis=0)
+                top3 = avg_probs.argsort()[-3:][::-1]
+                print(f"[{time.strftime('%H:%M:%S')}] 🎯 상위 예측 결과:")
                 for i in top3:
                     label = label_encoder.inverse_transform([i])[0]
-                    prob = prediction[0][i]
-                    print(f" - {label}: {prob:.4f}")
+                    prob = avg_probs[i]
+                    print(f" - {label}: {prob:.3f}")
                 last_debug_time = current_time
 
-            # 버퍼에서 가장 흔한 예측값으로 최종 label 설정
+            # 스무딩된 softmax 평균으로 최종 예측 결정
             if len(prediction_buffer) == prediction_buffer.maxlen:
-                most_common_label, count = Counter(prediction_buffer).most_common(1)[0]
-                if count >= 3:  # 5프레임 중 3번 이상 등장하면 확정
-                    last_label = f"{most_common_label} ({confidence:.2f})"
+                avg_probs = np.mean(prediction_buffer, axis=0)
+                best_idx = np.argmax(avg_probs)
+                best_confidence = avg_probs[best_idx]
+
+                if best_confidence > CONFIDENCE_THRESHOLD:
+                    best_label = label_encoder.inverse_transform([best_idx])[0]
+                    last_label = f"{best_label} ({best_confidence:.2f})"
                     cooldown = 15
 
-    # 텍스트 출력
     if cooldown > 0:
         img_pil = Image.fromarray(image)
         draw = ImageDraw.Draw(img_pil)
@@ -118,7 +122,7 @@ while cap.isOpened():
         image = np.array(img_pil)
         cooldown -= 1
 
-    cv2.imshow("Sign2Text (스무딩 적용)", image)
+    cv2.imshow("Sign2Text (softmax 평균 스무딩)", image)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
 
