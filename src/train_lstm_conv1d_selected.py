@@ -67,7 +67,7 @@ model.fit(
     validation_data=(X_val, y_val),
     epochs=30,
     batch_size=32,
-    callbacks=[early_stop, reduce_lr],
+    callbackㅅs=[early_stop, reduce_lr],
     class_weight=class_weight_dict
 )
 
