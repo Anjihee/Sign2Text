@@ -6,4 +6,3 @@ __pycache__/
 dataset/*.zip
 .ipynb_checkpoints/
 dataset/merged_labeled_vectors.csv
-dataset/merged_labeled_vectors.csv
