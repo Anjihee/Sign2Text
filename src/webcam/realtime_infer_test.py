@@ -44,7 +44,10 @@ def extract_rel(lms, W, H):
         return [0]*42
     pts = [(p.x*W, p.y*H) for p in lms]
     bx, by = pts[0]
-    return [x-bx for x, _ in pts] + [y-by for _, y in pts]
+    rel = []
+    for x, y in pts:
+        rel += [x - bx, y - by]
+    return rel
 
 def calc_ang(lms):
     if not lms:
