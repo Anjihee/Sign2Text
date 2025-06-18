@@ -1,2 +1,12 @@
+ HEAD
 #*.npy
 #*.zip
+
+venv/
+__pycache__/
+*.pyc
+*.h5
+*.pkl
+dataset/csv
+.ipynb_checkpoints/
+51323b4c18661e1fc0c5cc509cca735d45be2db8
