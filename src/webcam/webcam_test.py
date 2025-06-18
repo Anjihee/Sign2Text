@@ -11,7 +11,7 @@ from PIL import Image, ImageFont, ImageDraw
 # ==== 설정 ====
 SEQ_NAME = "L20"  # ← 여기를 바꾸면 시퀀스 테스트 가능: 'L10', 'L20', ...
 CONF_THRESH = 0.2
-CURRENT_LABEL = "콜라"
+CURRENT_LABEL = "좋다"
 
 # ==== 경로 설정 ====
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
