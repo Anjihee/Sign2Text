@@ -3,6 +3,5 @@ __pycache__/
 *.pyc
 *.h5
 *.pkl
-dataset/*.zip
+dataset/csv
 .ipynb_checkpoints/
-dataset/merged_labeled_vectors.csv
