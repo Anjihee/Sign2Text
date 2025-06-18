@@ -13,7 +13,6 @@
 ## 1 · 데이터 보강 흐름
 
 ```mermaid
-graph TD
 A[한국수어사전 원본 영상] -->|학습용 모션 인식| B(webcam_test.py)
 B -->|w 키로 저장| C[raw_seq_<label>_n.npy (20×114)]
 B --> D[norm_seq_<label>_n.npy ((raw - μ) / σ)]
