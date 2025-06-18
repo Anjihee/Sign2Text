@@ -2,9 +2,7 @@
 
 ---
 
-## 담당 파일 & 핵심 기여
-
-| 파일 | 내가 수정·구현한 포인트 |
+| 파일 | 수정 및 구현 포인트 |
 |------|-----------------------|
 | **`src/webcam/webcam_test.py`** | `w` 키로 웹캠 프레임 → `raw_seq_*.npy` / `norm_seq_*.npy` 자동 저장<br>· 저장 경로 `dataset/augmented_samples/<label>/` / 라벨당 **≈30샘플** 수집 권장 |
 | **`src/train_by_seq_aug.py`**  | 보강 시퀀스를 **원본 데이터와 통합 학습**<br>· `augmented_samples` 스캔 → shape 검증 후 `np.stack`<br>· 정규화 파라미터 저장(`X_mean.npy`, `X_std.npy`) & `EarlyStopping(patience=12)` |
@@ -14,6 +12,8 @@
 
 ## 1 · 데이터 보강 흐름
 
+```mermaid
+graph TD
 A[한국수어사전 원본 영상] -->|학습용 모션 인식| B(webcam_test.py)
 B -->|w 키로 저장| C[raw_seq_<label>_n.npy (20×114)]
 B --> D[norm_seq_<label>_n.npy ((raw - μ) / σ)]
