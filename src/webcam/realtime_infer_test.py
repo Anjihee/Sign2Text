@@ -9,10 +9,10 @@ from PIL import Image, ImageFont, ImageDraw
 import platform
 
 # ==== 시퀀스 설정 ====
-SEQ_NAME    = "L20"                  # 사용할 시퀀스 이름 (예: L10, L20, L30…)
-WINDOW_SIZE = int(SEQ_NAME[1:])      # 시퀀스 길이 (숫자 부분)
-CONF_THRESH = 0.3                    # 예측 허용 신뢰도 문턱값
-T           = 2.5                    # 온도 스케일링 파라미터
+SEQ_NAME    = "L20"
+WINDOW_SIZE = int(SEQ_NAME[1:])
+CONF_THRESH = 0.3
+T           = 2.5   # 온도 스케일링 파라미터
 
 # ==== 경로 설정 ====
 BASE_DIR      = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
@@ -41,38 +41,32 @@ except:
     font = ImageFont.load_default()
 
 def draw_text(img, text, pos=(10, 50), color=(255,255,0)):
-
-    """OpenCV 이미지 위에 한글 텍스트 그리기."""
     pil  = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(pil)
     draw.text(pos, text, font=font, fill=color)
     return cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
 
 def extract_rel(lms, W, H):
-    """랜드마크 좌표를 base point 대비 상대좌표로 변환."""
     if not lms:
         return [0]*42
     pts = [(p.x*W, p.y*H) for p in lms]
     bx, by = pts[0]
     rel = []
     for x, y in pts:
-        rel += [x - bx, y - by]
+        rel += [x-bx, y-by]
     return rel
 
 def calc_ang(lms):
-    """랜드마크들 간의 관절 각도 계산 (최대 15개)."""
     if not lms:
         return [0]*15
     ang = []
     for i in range(len(lms)-2):
-        a  = np.array([lms[i].x, lms[i].y])
+        a  = np.array([lms[i].x,   lms[i].y])
         b  = np.array([lms[i+1].x, lms[i+1].y])
         c  = np.array([lms[i+2].x, lms[i+2].y])
-        ba = a - b
-        bc = c - b
-        cos = np.dot(ba, bc) / (np.linalg.norm(ba)*np.linalg.norm(bc) + 1e-6)
+        ba = a - b; bc = c - b
+        cos = np.dot(ba, bc) / (np.linalg.norm(ba)*np.linalg.norm(bc)+1e-6)
         ang.append(np.degrees(np.arccos(np.clip(cos, -1,1))))
-    # 15개 고정 크기로 패딩
     return ang[:15] + [0]*(15 - len(ang))
 
 # ==== 웹캠 초기화 ====
@@ -116,7 +110,6 @@ while True:
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
-
     elif key == ord('s'):
         collecting = not collecting
         if collecting:
@@ -198,7 +191,7 @@ while True:
         display_mode  = True
         display_timer = time.time()
 
-    # ⑤ 결과 4초 유지
+    # 결과 4초 유지
     if display_mode and time.time() - display_timer >= 4.0:
         display_mode = False
         latest_text  = ""
