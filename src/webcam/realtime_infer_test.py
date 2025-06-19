@@ -5,6 +5,7 @@ import mediapipe as mp
 from collections import deque
 from tensorflow.keras.models import load_model
 from PIL import Image, ImageFont, ImageDraw
+import platform
 
 # ==== 시퀀스 설정 ====
 SEQ_NAME    = "L20"                  # 사용할 시퀀스 이름 (예: L10, L20, L30…)
@@ -33,8 +34,14 @@ sequence    = deque()
 collecting  = False
 latest_text = ""
 
-# mac 환경이라면 font 변경하고 사용하시길 바랍니다.
-font        = ImageFont.truetype("C:/Windows/Fonts/malgun.ttf", 32)
+try:
+    if platform.system() == "Windows":
+        font_path = "C:/Windows/Fonts/malgun.ttf"
+    else:  # macOS 또는 Linux
+        font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
+    font = ImageFont.truetype(font_path, 32)
+except:
+    font = ImageFont.load_default()
 
 def draw_text(img, text, pos=(10, 50), color=(255,255,0)):
     """OpenCV 이미지 위에 한글 텍스트 그리기."""
@@ -118,4 +125,57 @@ while True:
     cv2.imshow("Sign2Text", img)
     key = cv2.waitKey(1) & 0xFF
 
-    
+    if key == ord('q'):
+        break
+
+    elif key == ord('s'):
+        collecting = not collecting
+        if collecting:
+            sequence.clear()
+            latest_text = ""
+            print("🔘 수집 시작")
+        else:
+            print("🔘 수집 중지")
+
+    elif key == ord('p'):
+        if len(sequence) >= WINDOW_SIZE:
+            # 시퀀스 배열화
+            seq_arr   = np.array(sequence, dtype=np.float32)
+            n_windows = len(seq_arr) - WINDOW_SIZE + 1
+            windows   = np.stack([seq_arr[i:i+WINDOW_SIZE] for i in range(n_windows)], axis=0)
+            normed    = (windows - X_mean) / X_std
+            preds     = model.predict(normed, verbose=0)
+
+            # 온도 스케일링
+            logits  = np.log(np.clip(preds, 1e-12, 1.0))
+            scaled  = np.exp(logits / T)
+            preds_T = scaled / np.sum(scaled, axis=1, keepdims=True)
+
+            # 각 창별 최고 점수
+            window_scores = preds_T.max(axis=1)
+            best_win_idx  = window_scores.argmax()
+            best_pred     = preds_T[best_win_idx]
+
+            # Top-3 출력
+            top3_idx = best_pred.argsort()[-3:][::-1]
+            print("=== Top 3 Predictions ===")
+            for idx in top3_idx:
+                print(f"{id2label[idx]}: {best_pred[idx]:.2f}")
+            print("==========================")
+
+            # 문턱값 판정
+            top1_conf = best_pred[top3_idx[0]]
+            if top1_conf > CONF_THRESH:
+                latest_text = f"{id2label[top3_idx[0]]} ({top1_conf:.2f})"
+            else:
+                latest_text = ""
+                print(f"❗ 신뢰도 부족: {top1_conf:.2f}")
+
+            sequence.clear()
+
+        else:
+            print(f"❗ 시퀀스 부족: {len(sequence)}/{WINDOW_SIZE}")
+
+# 정리
+cap.release()
+cv2.destroyAllWindows()
