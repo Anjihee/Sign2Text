@@ -5,3 +5,6 @@ __pycache__/
 *.pkl
 dataset/csv
 .ipynb_checkpoints/
+
+# Ignore the README file
+README.md
