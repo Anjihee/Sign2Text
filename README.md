@@ -37,8 +37,6 @@ if key == ord("w"):
     np.save(save_dir/f"norm_seq_{CURRENT_LABEL}_{cnt}.npy", (seq_arr-X_mean)/X_std)
 ```
 
----
-
 ## 3 · `train_by_seq_aug.py` 통합 로직
 
 ```python
@@ -90,7 +88,10 @@ if display_mode and time.time() - display_timer >= 4:
 * 결과 유지 4 s → 이후 새 제스처 시 즉시 update
 * 손 사라짐 1 s (`sequence.clear()`) → 버퍼 깔끔 리셋 (깜빡임 무시)
 
----
+
+- `src/train/train_by_seq.py` 실행 시: 보강 없이 학습된 모델이 `models/L##/` 폴더에 저장됨
+- `src/train/train_by_seq_aug.py` 실행 시: 보강 데이터를 포함하여 학습된 모델이 저장됨
+- 각 모델 폴더(`models/L10/`, `models/L20/` 등)에는 아래 파일들이 포함됨:
 
 ## 5 · 작업 순서
 
