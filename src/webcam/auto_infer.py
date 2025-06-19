@@ -38,8 +38,6 @@ X_mean        = np.load(os.path.join(MODEL_DIR, 'X_mean.npy'))
 X_std         = np.load(os.path.join(MODEL_DIR, 'X_std.npy'))
 id2label      = {i: lbl for i, lbl in enumerate(label_classes)}
 
-<<<<<<< HEAD
-=======
 # ─ 비디오 파일 탐색 ────────────────────────────────────────────────────────────
 VIDEOS_DIR = os.path.join(BASE_DIR, 'videos')
 name, ext = os.path.splitext(args.video_name)
@@ -55,7 +53,6 @@ else:
         print(f"❌ 비디오 파일이 존재하지 않습니다: {args.video_name}")
         exit(1)
 
->>>>>>> 데이터 보강용 코드 auto_infer.py
 # ─ MediaPipe 손 검출 세팅 ──────────────────────────────────────────────────────
 mp_hands   = mp.solutions.hands
 hands      = mp_hands.Hands(max_num_hands=2,
