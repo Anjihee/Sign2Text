@@ -152,7 +152,15 @@ The Sign2Text project was trained on a curated dataset containing **61 sign lang
 ### 🖼️ Visual Summary
 <img width="707" alt="Image" src="https://github.com/user-attachments/assets/efdbad31-5711-4c92-bf4e-8626f7356886" />
 
-*A Venn diagram showing the overlap between original and augmented label sets.*
+A Venn diagram showing the overlap between original and augmented label sets.
+### ✅ Actually Recognized Labels in Real-Time Inference (30)
+#### 🔁 Common (19)
+`감기`, `개학`, `경찰서`, `독서`, `독일어`, `라면`, `병문안`, `보건소`, `수면제`, `술`,  
+`슬프다`, `싫어하다`, `커피`, `콜라`, `퇴원`, `치료`, `학교`, `입원`, `월세`
+
+#### ➕ Augmented-only (11)
+`꿀`, `나(1인칭)`, `너(2인칭)`, `딸`, `아들`, `안녕하세요`, `영어`, `운동`, `입사`, `좋다`
+
 
 ---
 
