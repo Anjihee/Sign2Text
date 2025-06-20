@@ -271,7 +271,7 @@ python src/predict/label_similarity_filter.py
 
 | Role     | Name (GitHub)                                | Responsibility                | Details                                                        |
 |----------|----------------------------------------------|-------------------------------|----------------------------------------------------------------|
-| 🧑‍💼 Team Lead| [An Jihee](https://github.com/Anjihee)         | Modeling, Real-time Inference System | Built Conv1D + BiLSTM model and PyQt5-based GUI for real-time sign recognition |
+| 🧑‍💼 Team Lead| [An Jihee](https://github.com/Anjihee)         | Modeling, Real-time Inference System | Built Conv1D + BiLSTM model and PyQt5-based GUI for real-time sign recognition, Conducted sequence length testing|
 | 👩‍💻 Member| [Kim Minseo](https://github.com/oweenia03)     | Data Collection, Preprocessing, Evaluation | Extracted raw keypoints, constructed labeled CSVs, and participated in testing |
 | 👩‍💻 Member| [Lee Jimin](https://github.com/leejm429)       | Data Augmentation, Evaluation | Generated augmented sequences and conducted hold-out testing   |
 
