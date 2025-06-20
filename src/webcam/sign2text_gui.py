@@ -12,46 +12,45 @@ from PIL import Image, ImageFont, ImageDraw
 import platform
 
 # ==== 시퀀스 설정 ====
-FPS = 30
-threshold_lost = FPS * 2
-threshold_display = FPS * 4
-
-SEQ_NAME = "L20"
+SEQ_NAME    = "L20"
 WINDOW_SIZE = int(SEQ_NAME[1:])
 CONF_THRESH = 0.3
-T = 2.5
+T           = 2.5   # 온도 스케일링 파라미터
+THRESHOLD_LOST_SEC = 2.0
+THRESHOLD_DISPLAY_SEC = 4.0
 
 # ==== 경로 설정 ====
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-MODEL_DIR = os.path.join(BASE_DIR, 'models', SEQ_NAME)
-model = load_model(os.path.join(MODEL_DIR, 'sign_language_model_normalized.h5'))
+BASE_DIR      = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+MODEL_DIR     = os.path.join(BASE_DIR, 'models', SEQ_NAME)
+model         = load_model(os.path.join(MODEL_DIR, 'sign_language_model_normalized.h5'))
 label_classes = np.load(os.path.join(MODEL_DIR, 'label_classes.npy'), allow_pickle=True)
-X_mean = np.load(os.path.join(MODEL_DIR, 'X_mean.npy'))
-X_std = np.load(os.path.join(MODEL_DIR, 'X_std.npy'))
-id2label = {i: lbl for i, lbl in enumerate(label_classes)}
+X_mean        = np.load(os.path.join(MODEL_DIR, 'X_mean.npy'))
+X_std         = np.load(os.path.join(MODEL_DIR, 'X_std.npy'))
+id2label      = {i: lbl for i, lbl in enumerate(label_classes)}
 
 # ==== MediaPipe 설정 ====
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.7, min_tracking_confidence=0.7)
+mp_hands   = mp.solutions.hands
+hands      = mp_hands.Hands(max_num_hands=2,
+                            min_detection_confidence=0.7,
+                            min_tracking_confidence=0.7)
 mp_drawing = mp.solutions.drawing_utils
 
 # ==== 폰트 설정 ====
 try:
     if platform.system() == "Windows":
-        font = ImageFont.truetype("C:/Windows/Fonts/malgun.ttf", 32)
+        font_path = "C:/Windows/Fonts/malgun.ttf"
     else:
-        font = ImageFont.truetype("/System/Library/Fonts/Supplemental/AppleGothic.ttf", 32)
+        font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
+    font = ImageFont.truetype(font_path, 32)
 except:
     font = ImageFont.load_default()
 
-# OpenCV 이미지 위에 한글 텍스트 그리기
-def draw_text(img, text, pos=(10,50), color=(255,255,0)):
-    pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+def draw_text(img, text, pos=(10, 50), color=(255,255,0)):
+    pil  = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(pil)
     draw.text(pos, text, font=font, fill=color)
     return cv2.cvtColor(np.array(pil), cv2.COLOR_RGB2BGR)
 
-# 랜드마크 좌표를 base point 대비 상대 좌표로 변환
 def extract_rel(lms, W, H):
     if not lms:
         return [0]*42
@@ -59,26 +58,22 @@ def extract_rel(lms, W, H):
     bx, by = pts[0]
     rel = []
     for x, y in pts:
-        rel += [ x-bx, y-by ]
+        rel += [x-bx, y-by]
     return rel
 
-# 랜드마크들 간의 관절 각도 계신 (최대 15개)
 def calc_ang(lms):
     if not lms:
         return [0]*15
     ang = []
     for i in range(len(lms)-2):
-        a = np.array([lms[i].x, lms[i].y])
-        b = np.array([lms[i+1].x, lms[i+1].y])
-        c = np.array([lms[i+2].x, lms[i+2].y])
-        ba = a - b
-        bc = c - b
+        a  = np.array([lms[i].x,   lms[i].y])
+        b  = np.array([lms[i+1].x, lms[i+1].y])
+        c  = np.array([lms[i+2].x, lms[i+2].y])
+        ba = a - b; bc = c - b
         cos = np.dot(ba, bc) / (np.linalg.norm(ba)*np.linalg.norm(bc)+1e-6)
-        ang.append(np.degrees(np.arccos(np.clip(cos, -1, 1))))
+        ang.append(np.degrees(np.arccos(np.clip(cos, -1,1))))
     return ang[:15] + [0]*(15 - len(ang))
 
-
-# GUI 개선
 class Sign2TextApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -151,17 +146,16 @@ class Sign2TextApp(QWidget):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(30)
+        self.timer.start(33)  # 약 30FPS
 
-        # 기존 상태변수를 인스턴스 변수로 관리
         self.sequence = deque()
         self.collecting = False
         self.latest_text = ""
         self.hand_was_detected = False
         self.gesture_active = False
-        self.lost_count = 0
+        self.hands_gone_at = None
         self.display_mode = False
-        self.display_count = 0
+        self.display_timer = None
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -176,29 +170,17 @@ class Sign2TextApp(QWidget):
         if self.collecting and hand_detected and not self.hand_was_detected:
             self.gesture_active = True
             self.sequence.clear()
+            self.hands_gone_at = None
 
         self.hand_was_detected = hand_detected
 
         if self.gesture_active:
-            self.lost_count = self.lost_count + 1 if not hand_detected else 0
+            if not hand_detected and self.hands_gone_at is None:
+                self.hands_gone_at = time.time()
+            elif hand_detected:
+                self.hands_gone_at = None
 
-        if self.collecting and self.display_mode and len(self.sequence) > 0:
-            self.display_mode = False
-
-        left, right = [], []
-        if results.multi_hand_landmarks:
-            for lm, hd in zip(results.multi_hand_landmarks, results.multi_handedness):
-                if hd.classification[0].label == 'Left':
-                    left = lm.landmark
-                else:
-                    right = lm.landmark
-                mp_drawing.draw_landmarks(frame, lm, mp_hands.HAND_CONNECTIONS)
-
-        feats = extract_rel(left, W, H) + extract_rel(right, W, H) + calc_ang(left) + calc_ang(right)
-        if self.collecting and any(abs(f) > 1e-6 for f in feats):
-            self.sequence.append(feats)
-
-        if self.collecting and self.gesture_active and self.lost_count >= threshold_lost and not self.display_mode:
+        if self.collecting and self.gesture_active and self.hands_gone_at and time.time() - self.hands_gone_at >= THRESHOLD_LOST_SEC and not self.display_mode:
             if len(self.sequence) >= WINDOW_SIZE:
                 seq_arr = np.array(self.sequence)
                 windows = np.stack([seq_arr[i:i+WINDOW_SIZE] for i in range(len(seq_arr)-WINDOW_SIZE+1)], axis=0)
@@ -225,23 +207,33 @@ class Sign2TextApp(QWidget):
 
                 self.result_label.setText(f"결과: {self.latest_text}")
                 self.display_mode = True
-                self.display_count = 0
+                self.display_timer = time.time()
 
             self.gesture_active = False
-            self.lost_count = 0
+            self.hands_gone_at = None
 
-        if self.display_mode:
-            self.display_count += 1
-            if self.display_count >= threshold_display:
-                self.display_mode = False
-                self.latest_text = ""
-                self.sequence.clear()
+        if self.display_mode and time.time() - self.display_timer >= THRESHOLD_DISPLAY_SEC:
+            self.display_mode = False
+            self.latest_text = ""
+            self.sequence.clear()
+
+        left, right = [], []
+        if results.multi_hand_landmarks:
+            for lm, hd in zip(results.multi_hand_landmarks, results.multi_handedness):
+                if hd.classification[0].label == 'Left':
+                    left = lm.landmark
+                else:
+                    right = lm.landmark
+                mp_drawing.draw_landmarks(frame, lm, mp_hands.HAND_CONNECTIONS)
+
+        feats = extract_rel(left, W, H) + extract_rel(right, W, H) + calc_ang(left) + calc_ang(right)
+        if self.collecting and any(abs(f) > 1e-6 for f in feats):
+            self.sequence.append(feats)
 
         frame = draw_text(frame, f"상태: {'수집 중' if self.collecting else '대기 중'} | {len(self.sequence)}/{WINDOW_SIZE}", color=(0, 102, 204) if self.collecting else (50, 50, 50))
         img = QImage(frame, frame.shape[1], frame.shape[0], frame.strides[0], QImage.Format_BGR888)
         self.image_label.setPixmap(QPixmap.fromImage(img))
 
-    # 수집 / 중지
     def toggle_collect(self):
         self.collecting = not self.collecting
         self.sequence.clear()
