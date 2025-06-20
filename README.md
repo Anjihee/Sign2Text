@@ -188,6 +188,27 @@ python src/predict/label_similarity_filter.py
 
 ---
 
+## 🧩 Development Environment
+
+- **OS & Tools**:
+  - Windows 10 /  macOS (Apple Silicon)
+  - Anaconda (Python 3.8.20)
+  - Visual Studio Code
+
+- **Core Libraries**:
+  - `numpy==1.24.3`
+  - `pandas==2.0.3`
+  - `opencv-python==4.11.0.86`
+  - `mediapipe==0.10.11`
+  - `scipy==1.10.1`
+  - `tqdm==4.64.1`
+  - `pillow==10.4.0`
+  - `tensorflow==2.13.0`
+  - `keras==2.13.1`
+  - `PyQt5==5.15.9`
+ 
+---
+
 ## 👥 Team Members
 
 | Role     | Name (GitHub)                                | Responsibility                | Details                                                        |
