@@ -85,6 +85,14 @@ python src/webcam/sign2text_gui.py
 > 🔥 Temperature scaling and confidence thresholding included  
 > 🔁 Sequence is auto-cleared after prediction
 
+### 📸 Real-time Output Screenshots
+
+![Image](https://github.com/user-attachments/assets/d05a8879-8151-4a6f-9e51-4b5ebebfeed3)  
+<sub>*Predicting in real time (Top-3 result view)*</sub>
+
+![Image](https://github.com/user-attachments/assets/1ee3861a-c134-4525-8335-0e06af8335aa)  
+<sub>*Real-time GUI showing label “식당” recognized with high confidence*</sub>
+
 ---
 
 ## 🧠 Model Architecture
@@ -111,7 +119,51 @@ SEQ_NAME = "L20"
 - Make sure the model and `X_mean.npy`, `X_std.npy` in `models/L##` match this name
 
 ---
+ ---
 
+## 📂 Learning Data Composition
+
+The Sign2Text project was trained on a curated dataset containing **61 sign language labels**, constructed from both the original AI Hub data and newly augmented samples. The distribution of labels is as follows:
+
+| Category          | Label Count | Description |
+|-------------------|-------------|-------------|
+| 📦 Original only   | 31 labels   | Labels that exist only in the original dataset (`.npy` without augmentation) |
+| 🔁 Common (Shared) | 19 labels   | Labels included in both the original and augmented data |
+| ➕ Augmented only  | 11 labels   | Newly added labels from webcam-based augmentation |
+
+---
+
+### ✅ Label Lists by Type
+
+#### 📦 Original-only (31)
+`밥솥`, `출근`, `퇴사`, `포켓`, `여아`, `학업`, `여학교`, `백수`, `채팅`, `신학`,  
+`뉴질랜드`, `남아`, `독서실`, `유학`, `국어학`, `다과`, `의학`, `위스키`, `울산`, `구직`,  
+`학교연혁`, `문학`, `예습`, `사직`, `친아들`, `벌꿀`, `배드민턴`, `버스값`, `식당`, `월세`
+
+#### 🔁 Common (Original + Augmented, 19)
+`감기`, `개학`, `경찰서`, `독서`, `독일어`, `라면`, `병문안`, `보건소`, `수면제`, `술`,  
+`슬프다`, `싫어하다`, `커피`, `콜라`, `퇴원`, `치료`, `학교`, `입원`, `월세`
+
+#### ➕ Augmented-only (11)
+`꿀`, `나(1인칭)`, `너(2인칭)`, `딸`, `아들`, `안녕하세요`, `영어`, `운동`, `입사`, `좋다`
+
+---
+
+### 🖼️ Visual Summary
+<img width="707" alt="Image" src="https://github.com/user-attachments/assets/efdbad31-5711-4c92-bf4e-8626f7356886" />
+
+*A Venn diagram showing the overlap between original and augmented label sets.*
+
+---
+
+### 🧠 Key Findings
+
+- **Only 30 augmented labels** (common + augmented-only) were recognized reliably in real-time testing.
+- **Original-only labels were not recognized**, even if included during training.
+- This suggests that **data recency and augmentation quality** have a stronger impact on performance than just label presence.
+- Labels with freshly collected webcam samples showed significantly higher prediction confidence.
+
+---
 
 ## 🥕 Data Augmentation Workflow
 
