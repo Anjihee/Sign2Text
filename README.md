@@ -85,13 +85,11 @@ python src/webcam/sign2text_gui.py
 > 🔥 Temperature scaling and confidence thresholding included  
 > 🔁 Sequence is auto-cleared after prediction
 
-### 📸 Real-time Output Screenshots
+### 🧠 Real-Time Inference Demo: "Treatment" (`치료`)
 
-![Image](https://github.com/user-attachments/assets/d05a8879-8151-4a6f-9e51-4b5ebebfeed3)  
-<sub>*Predicting in real time (Top-3 result view)*</sub>
+![치료 예시](./assets/치료.gif)
 
-![Image](https://github.com/user-attachments/assets/1ee3861a-c134-4525-8335-0e06af8335aa)  
-<sub>*Real-time GUI showing label “식당” recognized with high confidence*</sub>
+The following GIF demonstrates a successful real-time recognition of the sign language gesture for **"treatment"** (`치료`) using our desktop application built with PyQt5 and MediaPipe.
 
 ---
 
