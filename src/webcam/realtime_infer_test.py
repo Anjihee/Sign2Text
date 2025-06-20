@@ -1,3 +1,6 @@
+# src/webcam/realtime_infer_test.py
+#!/usr/bin/env python3
+
 import os
 import time
 import cv2
