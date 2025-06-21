@@ -19,6 +19,35 @@ It is designed to assist communication by recognizing hand gestures using deep l
 
 ---
 
+## 🧩 Development Environment
+
+- **OS & Tools**:
+  - Windows 10 /  macOS (Apple Silicon)
+  - Anaconda (Python 3.8.20)
+  - Visual Studio Code
+
+- **Core Libraries**:
+  - `numpy==1.24.3`
+  - `pandas==2.0.3`
+  - `opencv-python==4.11.0.86`
+  - `mediapipe==0.10.11`
+  - `scipy==1.10.1`
+  - `tqdm==4.64.1`
+  - `pillow==10.4.0`
+  - `tensorflow==2.13.0`
+  - `keras==2.13.1`
+  - `PyQt5==5.15.9`
+---
+## 👥 Team Members
+
+| Role     | Name (GitHub)                                | Responsibility                | Details                                                        |
+|----------|----------------------------------------------|-------------------------------|----------------------------------------------------------------|
+| 🧑‍💼 Team Lead| [An Jihee](https://github.com/Anjihee)         | Modeling, Real-time Inference System | Built Conv1D + BiLSTM model and PyQt5-based GUI for real-time sign recognition, Conducted sequence length testing|
+| 👩‍💻 Member| [Kim Minseo](https://github.com/oweenia03)     | Data Collection, Preprocessing, Evaluation | Extracted raw keypoints, constructed labeled CSVs, and participated in testing |
+| 👩‍💻 Member| [Lee Jimin](https://github.com/leejm429)       | Data Augmentation, Evaluation | Generated augmented sequences and conducted hold-out testing   |
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -244,38 +273,10 @@ python src/predict/label_similarity_filter.py
 - Use Korean font: `AppleGothic` or `malgun.ttf` for readable text
 - Recommended: collect 30+ samples per label for robust accuracy
 
----
 
-## 🧩 Development Environment
-
-- **OS & Tools**:
-  - Windows 10 /  macOS (Apple Silicon)
-  - Anaconda (Python 3.8.20)
-  - Visual Studio Code
-
-- **Core Libraries**:
-  - `numpy==1.24.3`
-  - `pandas==2.0.3`
-  - `opencv-python==4.11.0.86`
-  - `mediapipe==0.10.11`
-  - `scipy==1.10.1`
-  - `tqdm==4.64.1`
-  - `pillow==10.4.0`
-  - `tensorflow==2.13.0`
-  - `keras==2.13.1`
-  - `PyQt5==5.15.9`
  
 ---
 
-## 👥 Team Members
-
-| Role     | Name (GitHub)                                | Responsibility                | Details                                                        |
-|----------|----------------------------------------------|-------------------------------|----------------------------------------------------------------|
-| 🧑‍💼 Team Lead| [An Jihee](https://github.com/Anjihee)         | Modeling, Real-time Inference System | Built Conv1D + BiLSTM model and PyQt5-based GUI for real-time sign recognition, Conducted sequence length testing|
-| 👩‍💻 Member| [Kim Minseo](https://github.com/oweenia03)     | Data Collection, Preprocessing, Evaluation | Extracted raw keypoints, constructed labeled CSVs, and participated in testing |
-| 👩‍💻 Member| [Lee Jimin](https://github.com/leejm429)       | Data Augmentation, Evaluation | Generated augmented sequences and conducted hold-out testing   |
-
----
 
 ## 📎 License
 
